@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a vulnerability
+    url: https://github.com/DevARTURIA/chore/security/advisories/new
+    about: Funds, keys or another user's data. Reported privately, never in a public issue.

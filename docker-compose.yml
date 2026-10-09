@@ -1,0 +1,70 @@
+version: "3.8"
+
+services:
+  chore-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+      target: dev
+    container_name: "chore-app"
+    depends_on:
+      chore-db:
+        condition: service_healthy
+    expose:
+      - "3000"
+    ports:
+      - "3000:3000"
+    working_dir: /usr/src/app
+    command: "/bin/bash ./local_entrypoint.sh"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@chore-db:5432/choredb
+      - DIRECT_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@chore-db:5432/choredb
+    volumes:
+      - .:/usr/src/app
+      - root_node_modules:/usr/src/app/node_modules
+      - webapp_next:/usr/src/app/.next
+
+  chore-studio:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+      target: dev
+    container_name: "chore-studio"
+    depends_on:
+      chore-db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@chore-db:5432/choredb
+    expose:
+      - "5555"
+    ports:
+      - "5555:5555"
+    working_dir: /usr/src/app
+    command: "pnpm npx prisma studio"
+    volumes:
+      - .:/usr/src/app
+      - root_node_modules:/usr/src/app/node_modules
+      - webapp_next:/usr/src/app/.next
+
+  chore-db:
+    image: "postgres:15"
+    container_name: "chore-db"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - "chore-db-data:/var/lib/postgresql/data"
+
+volumes:
+  chore-db-data:
+  root_node_modules:
+  webapp_next:

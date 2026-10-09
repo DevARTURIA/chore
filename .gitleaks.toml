@@ -1,0 +1,6 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Public Solana program and token addresses, not secrets"
+paths = ['''src/lib/utils/known-addresses\.json''']
